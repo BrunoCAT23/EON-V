@@ -1,0 +1,95 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+
+# =========================
+# Virtual environments
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+# Secrets / environment
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Tests / coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Logs / runtime data
+# =========================
+*.log
+logs/
+memory.json
+
+# =========================
+# Temporary audio
+# =========================
+input.wav
+input_fixed.wav
+voice_*.mp3
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# EON-V external dependencies
+# =========================
+
+# Local AI / speech models
+models/
+tools/piper/
+
+# Runtime / generated data
+memory/
+logs/
+
+# Local audio recordings
+input.wav
+input_fixed.wav
+voice_*.mp3
+
+# Python caches
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Environment / secrets
+.env
+.venv/
+venv/
+env/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Third-party audio assets
+freesound_community-*.wav

@@ -1,0 +1,10 @@
+deep-translator
+numpy
+openai
+pygame
+pytest
+pyttsx3
+requests
+sounddevice
+soundfile
+vosk

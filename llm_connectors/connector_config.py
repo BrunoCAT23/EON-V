@@ -1,0 +1,9 @@
+from settings import (
+    OLLAMA_BASE_URL,
+    OLLAMA_ENABLED,
+    OLLAMA_MODEL,
+    OPENAI_API_KEY,
+    OPENAI_BASE_URL,
+    OPENAI_ENABLED,
+    OPENAI_MODEL,
+)
