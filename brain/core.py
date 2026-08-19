@@ -187,61 +187,55 @@ class Brain:
         while self.action_queue.has_actions():
             self.run_next_action()
 
-    def process_event(self, event: str) -> None:
-        event = event.strip().lower()
-
-        if not event:
-            print("[BRAIN] Empty event")
-            return
-
+    def _handle_runtime_event(self, event: str) -> bool:
         if event == "run":
             self.run_next_action()
-            return
+            return True
 
         if event == "run_all":
             self.run_all_actions()
-            return
+            return True
 
         if event == "queue_status":
             print(f"[QUEUE] Current queue: {self.action_queue.snapshot()}")
-            return
+            return True
 
         if event == "idle_auto":
             actions = self.behavior_engine.generate_idle_behavior(self)
             self.enqueue_actions(actions)
-            return
+            return True
 
         if event == "auto_on":
             self.life_state.enable()
-            return
+            return True
 
         if event == "auto_off":
             self.life_state.disable()
-            return
+            return True
 
         if event == "life_start":
-           self.life_loop.start()
-           return
+            self.life_loop.start()
+            return True
 
         if event == "life_stop":
-           self.life_loop.stop()
-           return
+            self.life_loop.stop()
+            return True
 
         if event == "step":
-           self.runtime_orchestrator.step(self)
-           return
+            self.runtime_orchestrator.step(self)
+            return True
 
         if event == "tick":
             if self.life_state.is_enabled():
                 self.autonomous_loop.tick(self)
             else:
                 print("[AUTO_LOOP] Autonomous mode is disabled")
-            return
+            return True
 
         if event == "update":
             if not self.life_state.is_enabled():
                 print("[UPDATE] Autonomous mode is disabled")
-                return
+                return True
 
             self.life_state.next_tick()
             current_tick = self.life_state.get_tick()
@@ -255,12 +249,13 @@ class Brain:
             goal = self.goal_engine.decide_goal(self)
 
             goal_actions = []
+
             if goal:
                 print(f"[GOAL] Selected goal: {goal}")
                 self.current_goal = goal
                 goal_actions = self.goal_executor.execute(self, goal)
             else:
-                self.current_goal = None
+                 self.current_goal = None
 
             combined_actions = []
             combined_actions.extend(presence_actions)
@@ -271,13 +266,26 @@ class Brain:
                 self.enqueue_actions(combined_actions)
             else:
                 print("[UPDATE] No reactive actions generated")
+
             self.handle_check_reminders()
-            return
+            return True
 
         if event.startswith("behavior "):
             behavior_name = event.replace("behavior ", "", 1).strip()
             actions = self.behavior_engine.run_animation(behavior_name, self)
             self.enqueue_actions(actions)
+            return True
+
+        return False
+
+    def process_event(self, event: str) -> None:
+        event = event.strip().lower()
+
+        if not event:
+            print("[BRAIN] Empty event")
+            return
+
+        if self._handle_runtime_event(event):
             return
 
         self.event_bus.emit(event)
