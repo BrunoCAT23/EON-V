@@ -970,19 +970,26 @@ class Brain:
         ]
         self.enqueue_actions(actions)
 
+    def _decide_battery_low_actions(self) -> list[dict]:
+        self.state_manager.set_state("ERROR")
+        self.emotion_engine.set_emotion("sad")
+        self.trigger_emotion("sad", 0.45)
+
+        return [
+            {"type": "show_emotion", "value": "sad"},
+            {"type": "alert", "value": "Battery low"},
+            {
+                "type": "voice_reply",
+                "value": "Увага! Рівень заряду низький.",
+            },
+       ]
+
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
         focused_person = self.social_context.get_focused_person()
 
         if event == "battery_low":
-            self.state_manager.set_state("ERROR")
-            self.emotion_engine.set_emotion("sad")
-            self.trigger_emotion("sad", 0.45)
-            actions.append({"type": "show_emotion", "value": "sad"})
-            actions.append({"type": "alert", "value": "Battery low"})
-            actions.append(
-                {"type": "voice_reply", "value": "Увага! Рівень заряду низький."}
-            )
+            return self._decide_battery_low_actions()
 
         elif event == "voice":
             self.state_manager.set_state("LISTENING")
