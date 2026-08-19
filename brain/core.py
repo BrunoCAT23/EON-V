@@ -278,6 +278,97 @@ class Brain:
 
         return False
 
+    def _handle_command_event(self, event: str) -> bool:
+        if event == "status":
+            self.print_status()
+            return True
+
+        if event == "event_log":
+            self.print_event_log()
+            return True
+
+        if event == "diagnostics":
+            self.handle_diagnostics()
+            return True
+
+        if event == "safety_status":
+            self.handle_safety_status()
+            return True
+
+        if event == "schedule_status":
+            self.handle_schedule_status()
+            return True
+
+        if event.startswith("remind_in "):
+            self.handle_remind_in(event)
+            return True
+
+        if event == "check_reminders":
+            self.handle_check_reminders()
+            return True
+
+        if event.startswith("profile_set_name "):
+            self.handle_profile_set_name(event)
+            return True
+
+        if event.startswith("profile_add_date "):
+            self.handle_profile_add_date(event)
+            return True
+
+        if event.startswith("profile "):
+            self.handle_profile(event)
+            return True
+
+        if event.startswith("teach "):
+            self.handle_teach(event)
+            return True
+
+        if event.startswith("head "):
+            self.handle_head_command(event)
+            return True
+
+        if event.startswith("meet "):
+            self.handle_meet_person(event)
+            return True
+
+        if event.startswith("recognized_pet "):
+            self.handle_recognized_pet(event)
+            return True
+
+        if event.startswith("pet_detected "):
+            self.handle_pet_detected(event)
+            return True
+
+        if event.startswith("remember_fact "):
+            self.handle_remember_fact(event)
+            return True
+
+        if event.startswith("recall_person_facts "):
+            self.handle_recall_person_facts(event)
+            return True
+
+        if event == "dialogue_summary":
+            self.handle_dialogue_summary()
+            return True
+
+        if event.startswith("free_dialogue "):
+            self.handle_free_dialogue(event)
+            return True
+
+        if event.startswith("recognized_face "):
+            self.handle_recognized_face(event)
+            return True
+
+        if event == "voice_greeting":
+            self.handle_voice_greeting()
+            return True
+
+        if event == "no_face":
+            self.handle_no_face()
+            return True
+
+        return False
+
     def process_event(self, event: str) -> None:
         event = event.strip().lower()
 
@@ -288,98 +379,13 @@ class Brain:
         if self._handle_runtime_event(event):
             return
 
+        if self._handle_command_event(event):
+            return
+
         self.event_bus.emit(event)
         self.memory_manager.remember(f"event:{event}")
         self.event_log.record("event", event)
         self.context_manager.set_last_system_event(event)
-
-        if event == "status":
-            self.print_status()
-            return
-
-        if event == "event_log":
-            self.print_event_log()
-            return
-
-        if event == "diagnostics":
-            self.handle_diagnostics()
-            return
-
-        if event == "safety_status":
-            self.handle_safety_status()
-            return
-
-        if event == "schedule_status":
-            self.handle_schedule_status()
-            return
-
-        if event.startswith("remind_in "):
-            self.handle_remind_in(event)
-            return
-
-        if event == "check_reminders":
-            self.handle_check_reminders()
-            return
-
-        if event.startswith("profile_set_name "):
-            self.handle_profile_set_name(event)
-            return
-
-        if event.startswith("profile_add_date "):
-            self.handle_profile_add_date(event)
-            return
-
-        if event.startswith("profile "):
-            self.handle_profile(event)
-            return
-
-        if event.startswith("teach "):
-            self.handle_teach(event)
-            return
-
-        if event.startswith("head "):
-            self.handle_head_command(event)
-            return
-
-        if event.startswith("meet "):
-            self.handle_meet_person(event)
-            return
-
-        if event.startswith("recognized_pet "):
-            self.handle_recognized_pet(event)
-            return
-
-        if event.startswith("pet_detected "):
-            self.handle_pet_detected(event)
-            return
-
-        if event.startswith("remember_fact "):
-            self.handle_remember_fact(event)
-            return
-
-        if event.startswith("recall_person_facts "):
-            self.handle_recall_person_facts(event)
-            return
-
-        if event == "dialogue_summary":
-            self.handle_dialogue_summary()
-            return
-
-        if event.startswith("free_dialogue "):
-            self.handle_free_dialogue(event)
-            return
-
-        if event.startswith("recognized_face "):
-            self.handle_recognized_face(event)
-            return
-
-        if event == "voice_greeting":
-            self.handle_voice_greeting()
-            return
-
-        if event == "no_face":
-            self.handle_no_face()
-            return
 
         if not self.planner.should_handle_event(event):
             print(f"[PLANNER] Ignored event: {event}")
