@@ -1000,6 +1000,39 @@ class Brain:
             },
         ]
 
+    def _decide_think_actions(self, focused_person: str | None) -> list[dict]:
+        self.state_manager.set_state("THINKING")
+        self.emotion_engine.set_emotion("thinking")
+        self.trigger_emotion("thinking", 0.4)
+
+        actions = [
+            {"type": "show_emotion", "value": "thinking"},
+            {"type": "log", "value": "Decision engine is processing context"},
+        ]
+
+        if focused_person:
+            text = f"Я аналізую ситуацію, {focused_person}."
+            relationship = self.relationship_model.get_relationship(self, focused_person)
+            attachment_style = self.memory_manager.get_people().get(
+                focused_person, {}
+            ).get("attachment_style", "distant_polite")
+
+            text = self.personality_engine.build_relationship_adjusted_reply(
+                text, relationship.get("bond_level", "new")
+            )
+            text = self.companion_behavior.build_companion_reply(
+                text, attachment_style
+            )
+        else:
+            text = "Я аналізую ситуацію."
+
+        text = self.personality_engine.build_mood_adjusted_reply(
+            text, self.current_mood
+        )
+
+        actions.append({"type": "voice_reply", "value": text})
+        return actions
+
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
         focused_person = self.social_context.get_focused_person()
@@ -1042,34 +1075,7 @@ class Brain:
             return self._decide_face_actions()
 
         elif event == "think":
-            self.state_manager.set_state("THINKING")
-            self.emotion_engine.set_emotion("thinking")
-            self.trigger_emotion("thinking", 0.4)
-            actions.append({"type": "show_emotion", "value": "thinking"})
-            actions.append(
-                {"type": "log", "value": "Decision engine is processing context"}
-            )
-
-            if focused_person:
-                text = f"Я аналізую ситуацію, {focused_person}."
-                relationship = self.relationship_model.get_relationship(self, focused_person)
-                attachment_style = self.memory_manager.get_people().get(
-                    focused_person, {}
-                ).get("attachment_style", "distant_polite")
-
-                text = self.personality_engine.build_relationship_adjusted_reply(
-                    text, relationship.get("bond_level", "new")
-                )
-                text = self.companion_behavior.build_companion_reply(
-                    text, attachment_style
-                )
-            else:
-                text = "Я аналізую ситуацію."
-
-            text = self.personality_engine.build_mood_adjusted_reply(
-                text, self.current_mood
-            )
-            actions.append({"type": "voice_reply", "value": text})
+            return self._decide_think_actions(focused_person)
 
         elif event == "sleep":
             self.state_manager.set_state("SLEEP")
