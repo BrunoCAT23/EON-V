@@ -984,6 +984,22 @@ class Brain:
             },
        ]
 
+    def _decide_face_actions(self) -> list[dict]:
+        self.perception_fusion.on_unknown_face(self)
+        self.context_manager.set_last_visual_event("face")
+        self.state_manager.set_state("TRACKING_PERSON")
+        self.emotion_engine.set_emotion("happy")
+        self.trigger_emotion("curious", 0.25)
+
+        return [
+            {"type": "show_emotion", "value": "happy"},
+            {"type": "track_face"},
+            {
+                "type": "voice_reply",
+                "value": self.personality_engine.build_face_seen_response(),
+            },
+        ]
+
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
         focused_person = self.social_context.get_focused_person()
@@ -1023,19 +1039,7 @@ class Brain:
             actions.append({"type": "voice_reply", "value": text})
 
         elif event == "face":
-            self.perception_fusion.on_unknown_face(self)
-            self.context_manager.set_last_visual_event("face")
-            self.state_manager.set_state("TRACKING_PERSON")
-            self.emotion_engine.set_emotion("happy")
-            self.trigger_emotion("curious", 0.25)
-            actions.append({"type": "show_emotion", "value": "happy"})
-            actions.append({"type": "track_face"})
-            actions.append(
-                {
-                    "type": "voice_reply",
-                    "value": self.personality_engine.build_face_seen_response(),
-                }
-            )
+            return self._decide_face_actions()
 
         elif event == "think":
             self.state_manager.set_state("THINKING")
