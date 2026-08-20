@@ -1066,6 +1066,39 @@ class Brain:
             {"type": "show_emotion", "value": "sad"},
             {"type": "voice_reply", "value": "Мені трохи сумно."},
         ]
+
+    def _decide_idle_actions(self, focused_person: str | None) -> list[dict]:
+        self.state_manager.set_state("IDLE")
+
+        actions = [{"type": "idle_animation"}]
+
+        if focused_person:
+            text = f"Я спостерігаю за тобою, {focused_person}."
+            relationship = self.relationship_model.get_relationship(
+                self, focused_person
+            )
+            attachment_style = self.memory_manager.get_people().get(
+                focused_person, {}
+            ).get("attachment_style", "distant_polite")
+
+            text = self.personality_engine.build_relationship_adjusted_reply(
+                 text,
+                relationship.get("bond_level", "new"),
+            )
+            text = self.companion_behavior.build_companion_reply(
+                text,
+                attachment_style,
+            )
+        else:
+            text = self.personality_engine.build_idle_thought()
+
+        text = self.personality_engine.build_mood_adjusted_reply(
+            text,
+            self.current_mood,
+        )
+
+        actions.append({"type": "voice_reply", "value": text})
+        return actions
         
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
@@ -1121,36 +1154,15 @@ class Brain:
             return self._decide_sad_actions()
 
         elif event == "idle":
-            self.state_manager.set_state("IDLE")
-            actions.append({"type": "idle_animation"})
-
-            if focused_person:
-                text = f"Я спостерігаю за тобою, {focused_person}."
-                relationship = self.relationship_model.get_relationship(self, focused_person)
-                attachment_style = self.memory_manager.get_people().get(
-                    focused_person, {}
-                ).get("attachment_style", "distant_polite")
-
-                text = self.personality_engine.build_relationship_adjusted_reply(
-                    text, relationship.get("bond_level", "new")
-                )
-                text = self.companion_behavior.build_companion_reply(
-                    text, attachment_style
-                )
-            else:
-                text = self.personality_engine.build_idle_thought()
-
-            text = self.personality_engine.build_mood_adjusted_reply(
-                text, self.current_mood
-            )
-            actions.append({"type": "voice_reply", "value": text})
-
+            return self._decide_idle_actions(focused_person)
         else:
-            actions.append({"type": "log", "value": f"Unknown event: {event}"})
+            actions.append(
+                {"type": "log", "value": f"Unknown event: {event}"}
+            )
             actions.append(
                 {
                     "type": "voice_reply",
-                    "value": "Я не впевнений, що це означає. Поясни мені?",
+                    "value": "Я не впевнений, що це означає. Поясни мені!",
                 }
             )
 
