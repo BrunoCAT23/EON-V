@@ -1033,6 +1033,20 @@ class Brain:
         actions.append({"type": "voice_reply", "value": text})
         return actions
 
+    def _decide_sleep_actions(self) -> list[dict]:
+        self.state_manager.set_state("SLEEP")
+        self.emotion_engine.set_emotion("sleepy")
+        self.trigger_emotion("sleepy", 0.5)
+
+        return [
+            {"type": "show_emotion", "value": "sleepy"},
+            {"type": "sleep_mode"},
+            {
+                "type": "voice_reply",
+                "value": "Переходжу до режиму сну.",
+            },
+        ]
+
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
         focused_person = self.social_context.get_focused_person()
@@ -1078,14 +1092,7 @@ class Brain:
             return self._decide_think_actions(focused_person)
 
         elif event == "sleep":
-            self.state_manager.set_state("SLEEP")
-            self.emotion_engine.set_emotion("sleepy")
-            self.trigger_emotion("sleepy", 0.5)
-            actions.append({"type": "show_emotion", "value": "sleepy"})
-            actions.append({"type": "sleep_mode"})
-            actions.append(
-                {"type": "voice_reply", "value": "Переходжу до режиму сну."}
-            )
+            return self._decide_sleep_actions()
 
         elif event == "wake":
             self.state_manager.set_state("IDLE")
