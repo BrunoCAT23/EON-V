@@ -1056,7 +1056,17 @@ class Brain:
             {"type": "show_emotion", "value": "neutral"},
             {"type": "voice_reply", "value": "Я знову активний."},
         ]
-    
+
+    def _decide_sad_actions(self) -> list[dict]:
+        self.state_manager.set_state("IDLE")
+        self.emotion_engine.set_emotion("sad")
+        self.trigger_emotion("sad", 0.5)
+
+        return [
+            {"type": "show_emotion", "value": "sad"},
+            {"type": "voice_reply", "value": "Мені трохи сумно."},
+        ]
+        
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
         focused_person = self.social_context.get_focused_person()
@@ -1108,11 +1118,7 @@ class Brain:
             return self._decide_wake_actions()
         
         elif event == "sad":
-            self.state_manager.set_state("IDLE")
-            self.emotion_engine.set_emotion("sad")
-            self.trigger_emotion("sad", 0.5)
-            actions.append({"type": "show_emotion", "value": "sad"})
-            actions.append({"type": "voice_reply", "value": "Мені трохи сумно."})
+            return self._decide_sad_actions()
 
         elif event == "idle":
             self.state_manager.set_state("IDLE")
