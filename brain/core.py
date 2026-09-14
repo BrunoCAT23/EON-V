@@ -1099,6 +1099,45 @@ class Brain:
 
         actions.append({"type": "voice_reply", "value": text})
         return actions
+
+    def _decide_voice_actions(self, focused_person) -> list[dict]:
+        actions = []
+
+        self.state_manager.set_state("LISTENING")
+        self.emotion_engine.set_emotion("curious")
+        self.trigger_emotion("curious", 0.3)
+
+        actions.append({"type": "show_emotion", "value": "curious"})
+        actions.append({"type": "listen"})
+
+        if focused_person:
+            text = f"Я слухаю тебе, {focused_person}."
+            self.needs_engine.satisfy("social", 0.2)
+        else:
+            text = self.personality_engine.build_greeting()
+
+        if focused_person:
+            relationship = self.relationship_model.get_relationship(
+                self, focused_person
+         )
+            attachment_style = self.memory_manager.get_people().get(
+                focused_person, {}
+            ).get("attachment_style", "distant_polite")
+
+            text = self.personality_engine.build_relationship_adjusted_reply(
+                text, relationship.get("bond_level", "new")
+            )
+            text = self.companion_behavior.build_companion_reply(
+                text, attachment_style
+            )
+
+        text = self.personality_engine.build_mood_adjusted_reply(
+            text, self.current_mood
+        )
+
+        actions.append({"type": "voice_reply", "value": text})
+
+        return actions
         
     def decide_actions(self, event: str) -> list[dict]:
         actions = []
@@ -1108,35 +1147,7 @@ class Brain:
             return self._decide_battery_low_actions()
 
         elif event == "voice":
-            self.state_manager.set_state("LISTENING")
-            self.emotion_engine.set_emotion("curious")
-            self.trigger_emotion("curious", 0.3)
-            actions.append({"type": "show_emotion", "value": "curious"})
-            actions.append({"type": "listen"})
-
-            if focused_person:
-                text = f"Я слухаю тебе, {focused_person}."
-                self.needs_engine.satisfy("social", 0.2)
-            else:
-                text = self.personality_engine.build_greeting()
-
-            if focused_person:
-                relationship = self.relationship_model.get_relationship(self, focused_person)
-                attachment_style = self.memory_manager.get_people().get(
-                    focused_person, {}
-                ).get("attachment_style", "distant_polite")
-
-                text = self.personality_engine.build_relationship_adjusted_reply(
-                    text, relationship.get("bond_level", "new")
-                )
-                text = self.companion_behavior.build_companion_reply(
-                    text, attachment_style
-                )
-
-            text = self.personality_engine.build_mood_adjusted_reply(
-                text, self.current_mood
-            )
-            actions.append({"type": "voice_reply", "value": text})
+            return self._decide_voice_actions(focused_person)
 
         elif event == "face":
             return self._decide_face_actions()
