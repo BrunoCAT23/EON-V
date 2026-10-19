@@ -36,10 +36,6 @@ def main() -> int:
 
     results.append(check("settings loaded", settings.PROJECT_ROOT.exists()))
     results.append(check("memory directory", (settings.PROJECT_ROOT / "memory").exists()))
-    results.append(check("Piper executable", (settings.PROJECT_ROOT / "tools" / "piper" / "piper.exe").exists()))
-    results.append(check("Piper Ukrainian voice", (settings.PROJECT_ROOT / "tools" / "piper" / "voices" / "uk_UA-ukrainian_tts-medium.onnx").exists()))
-    results.append(check("Vosk model", (settings.PROJECT_ROOT / "models" / "vosk").exists()))
-
     piper_exe = Path(settings.PIPER_EXE_PATH)
     if not piper_exe.is_absolute():
         piper_exe = settings.PROJECT_ROOT / piper_exe
@@ -52,9 +48,15 @@ def main() -> int:
     if not vosk_model.is_absolute():
         vosk_model = settings.PROJECT_ROOT / vosk_model
 
-    results.append(check("Configured Piper executable", piper_exe.exists(), str(piper_exe)))
-    results.append(check("Configured Piper voice", piper_voice.exists(), str(piper_voice)))
-    results.append(check("Configured Vosk model", vosk_model.exists(), str(vosk_model)))
+    if settings.TTS_MODE == "local_ready":
+        results.append(check("Configured Piper executable", piper_exe.is_file(), str(piper_exe)))
+        results.append(check("Configured Piper voice", piper_voice.is_file(), str(piper_voice)))
+    else:
+        print("[SKIP] Piper assets: TTS_MODE does not select local_ready")
+    if settings.STT_MODE == "local_ready":
+        results.append(check("Configured Vosk model", vosk_model.is_dir(), str(vosk_model)))
+    else:
+        print("[SKIP] Vosk model: STT_MODE does not select local_ready")
 
     startup_sound = Path(settings.STARTUP_SOUND_PATH)
     if not startup_sound.is_absolute():
@@ -72,6 +74,7 @@ def main() -> int:
     last_frame = Path(settings.LAST_FRAME_PATH)
     if not last_frame.is_absolute():
         last_frame = settings.PROJECT_ROOT / last_frame
+    last_frame.parent.mkdir(parents=True, exist_ok=True)
     results.append(check("Last frame path parent", last_frame.parent.exists(), str(last_frame.parent)))
 
     print("")

@@ -67,7 +67,9 @@ models/
 tools/piper/
 
 # Runtime / generated data
-memory/
+memory/*
+!memory/__init__.py
+!memory/memory_manager.py
 logs/
 
 # Local audio recordings
@@ -93,3 +95,12 @@ Thumbs.db
 
 # Third-party audio assets
 freesound_community-*.wav
+# Private credentials and local exports
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+key AI*.txt
+*.zip

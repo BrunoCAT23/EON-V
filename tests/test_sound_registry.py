@@ -1,5 +1,8 @@
 import os
 import unittest
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
 os.environ["SOUND_EFFECTS_ENABLED"] = "false"
 os.environ["STARTUP_SOUND_ENABLED"] = "false"
@@ -8,6 +11,16 @@ from sounds.sound_registry import list_sounds, resolve_sound
 
 
 class SoundRegistryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        fixture = Path(directory.name) / "freesound_community-robot-6282.wav"
+        from sounds.startup_sound import generate_startup_sound
+        generate_startup_sound(fixture)
+        override = patch("sounds.sound_registry.SOUND_EFFECTS_DIR", directory.name)
+        override.start()
+        self.addCleanup(override.stop)
+
     def test_startup_alias_is_available(self) -> None:
         sounds = list_sounds()
 
