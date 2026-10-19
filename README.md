@@ -5,8 +5,12 @@ EON-V is a modular robot companion runtime. The project is split into brain, voi
 ## Quick Start
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 python tools\healthcheck.py
+python -m pytest -q
 python -m unittest discover
 python main.py
 ```
@@ -74,3 +78,33 @@ estop_reset
 ## Notes
 
 Memory is stored in `memory/data.json`. The memory manager keeps recent events/dialogue bounded and creates `memory/data.json.bak` before overwriting persistent memory outside sandbox mode.
+
+Use Python 3.10 or newer. The publication checks were run with Python 3.10.0.
+The default stub/fallback simulation does not require model downloads, API keys,
+a microphone, camera, or physical robot. `healthcheck` checks Piper and Vosk
+assets when `TTS_MODE=local_ready` and `STT_MODE=local_ready`, respectively.
+
+The `models/` and `tools/piper/` directories, personal memory, logs, recordings,
+and third-party sound recordings are intentionally excluded from Git. Install
+external resources separately only if you need their backends; configure their
+paths in `.env`. Missing optional sound aliases are unavailable until their
+corresponding recordings are installed. Tests generate their own audio fixture.
+
+Before sharing changes, review [publication checks](docs/PUBLISHING.md) and
+[asset provenance](docs/ASSETS.md). Never add `.env`, memory records, or local
+credentials.
+
+## License
+
+Copyright (C) 2026 BrunoCAT23.
+
+Project software and its documentation are licensed under the GNU General
+Public License version 3 only (SPDX: GPL-3.0-only). See [LICENSE](LICENSE).
+External models, runtimes and recordings retain their own terms and are not
+bundled. CAD files have separate licensing described in [cad/README.md](cad/README.md).
+
+## Mechanical design
+
+The owner-supplied [EON-V Fusion design and preview](cad/README.md) are included
+under CC BY 4.0. The archive is unchanged; printability and assembly fit have
+not been validated. STEP/STL/3MF exports are not included.
