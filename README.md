@@ -1,5 +1,7 @@
 # EON-V
 
+[![Tests](https://github.com/BrunoCAT23/EON-V/actions/workflows/tests.yml/badge.svg?branch=main&event=push)](https://github.com/BrunoCAT23/EON-V/actions/workflows/tests.yml)
+
 EON-V is a modular robot companion runtime. The project is split into brain, voice, vision, memory, behavior, hardware, LLM, tools, and tests so simulation work can move toward real hardware in small steps.
 
 ## Quick Start
